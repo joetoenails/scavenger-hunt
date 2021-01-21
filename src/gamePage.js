@@ -1,4 +1,5 @@
 import React from "react";
+import { Canvas } from "./webcamCanvas";
 
 class GamePage extends React.Component {
   constructor(props) {
@@ -9,6 +10,7 @@ class GamePage extends React.Component {
     return (
       <div>
         <h1>Ready to play?</h1>
+        <Canvas />
       </div>
     );
   }
