@@ -1,5 +1,5 @@
 import React from "react";
-import { Canvas } from "./webcamCanvas";
+import { WebcamCanvas } from "./webcamCanvas";
 
 class GamePage extends React.Component {
   constructor(props) {
@@ -10,7 +10,13 @@ class GamePage extends React.Component {
     return (
       <div>
         <h1>Ready to play?</h1>
-        <Canvas />
+        <WebcamCanvas />
+        <div>
+          <p>Find these items:</p>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+        </div>
       </div>
     );
   }
