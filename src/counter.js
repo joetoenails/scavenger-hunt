@@ -13,11 +13,18 @@ class Counter extends React.Component {
   }
 
   countdown() {
-    const timer = setInterval(() => {
+    let searcher;
+    let timer = setInterval(() => {
       this.setState({ counter: this.state.counter - 1 });
+      if (this.state.counter === 0) {
+        clearTimeout(timer);
+        clearTimeout(searcher);
+        this.setState({ gameLost: true });
+      }
     }, 1000);
 
-    const searcher = setInterval(async () => {
+    searcher = setInterval(async () => {
+      console.log("searching...");
       const currentPredictions = await this.props.predict();
       if (this.props.checkMatch(currentPredictions, this.props.searchItems)) {
         this.setState({ gameWon: true });
@@ -25,12 +32,6 @@ class Counter extends React.Component {
         clearTimeout(timer);
       }
     }, 500);
-
-    setTimeout(() => {
-      this.setState({ gameLost: true });
-      clearTimeout(searcher);
-      clearTimeout(timer);
-    }, 15000);
   }
 
   resetGame() {
