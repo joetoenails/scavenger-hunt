@@ -8,10 +8,17 @@ function randomNum() {
 }
 
 function getLabels() {
+  let arr = [];
+  while (arr.length < 3) {
+    let num = Math.floor(Math.random() * 999);
+    if (arr.indexOf(num) === -1) {
+      arr.push(num);
+    }
+  }
   return [
-    labels[randomNum()].split(",")[0],
-    labels[randomNum()].split(",")[0],
-    labels[randomNum()].split(",")[0],
+    labels[arr[0]].split(",")[0],
+    labels[arr[1]].split(",")[0],
+    labels[arr[2]].split(",")[0],
   ];
 }
 
@@ -22,35 +29,30 @@ class WebcamCanvas extends React.Component {
     this.state = {
       videoLoaded: false,
       playerReady: false,
-      searchItems: getLabels(),
+      searchItems: [...getLabels(), "coffee mug"],
+      gameIsWon: false,
     };
     //refs
     this.video = React.createRef();
     this.counter = React.createRef();
-    this.predictions = React.createRef();
 
     //bindings
     this.countdown = this.countdown.bind(this);
     this.readyUp = this.readyUp.bind(this);
     this.checkMatch = this.checkMatch.bind(this);
     this.predict = this.predict.bind(this);
-    this.setVidSrc = this.setVidSrc.bind(this);
-  }
-
-  setVidSrc() {
-    this.video.current.srcObject = this.props.videoSource;
   }
 
   async predict() {
     const predictions = await this.props.model.classify(this.video.current);
-    this.predictions.current = predictions;
-    console.log(this.predictions.current);
+    return predictions;
   }
 
   readyUp() {
     this.setState({ playerReady: true });
     this.countdown();
   }
+
   countdown() {
     const timer = setInterval(() => {
       this.counter.current.innerHTML =
@@ -60,41 +62,44 @@ class WebcamCanvas extends React.Component {
         clearInterval(timer);
         this.counter.current.innerHTML = "OUT OF TIME!";
       }
+      if (this.state.gameIsWon) {
+        clearInterval(timer);
+        this.counter.current.innerHTML = "FOUND IT!";
+      }
     }, 1000);
+
+    const searcher = setInterval(async () => {
+      const currentPredictions = await this.predict();
+      const found = this.checkMatch(currentPredictions, this.state.searchItems);
+      if (this.state.gameIsWon) {
+        clearInterval(searcher);
+      }
+    }, 500);
   }
 
   checkMatch(predictions, searchItems) {
-    let found = false;
     const top1 = predictions[0];
     const top2 = predictions[1];
 
     searchItems.forEach((item) => {
-      console.log(item);
       if (item === top1.className || item === top2.className) {
-        found = true;
+        this.setState({ gameIsWon: true });
+        return true;
       }
     });
-    return found;
   }
 
   render() {
     if (this.video.current) {
-      this.setVidSrc();
+      this.video.current.srcObject = this.props.videoSource;
     }
 
     return (
       <div>
+        {!this.video.current && <h4>Grabbing webcam feed...</h4>}
         <div>
           <video ref={this.video} autoPlay={true}></video>
         </div>
-        <button onClick={this.predict}> Predict</button>
-        <button
-          onClick={() => {
-            this.checkMatch(this.predictions.current, this.state.searchItems);
-          }}
-        >
-          Check Match
-        </button>
         <div>
           {this.state.playerReady ? (
             <div>
