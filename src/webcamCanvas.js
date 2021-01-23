@@ -3,6 +3,8 @@ import { render } from "react-dom";
 import GamePage from "./gamePage";
 import labels from "../dist/imagenetLabels";
 
+const constraints = { audio: false, video: { width: 400, height: 400 } };
+
 function randomNum() {
   return Math.floor(Math.random() * 999);
 }
@@ -95,30 +97,59 @@ class WebcamCanvas extends React.Component {
     }
 
     return (
-      <div>
-        {!this.video.current && <h4>Grabbing webcam feed...</h4>}
-        <div>
-          <video ref={this.video} autoPlay={true}></video>
-        </div>
-        <div>
-          {this.state.playerReady ? (
-            <div>
-              <p>You have 15 seconds to find one of these items!</p>
-              <h1 ref={this.counter}>15</h1>
-              {this.state.searchItems.map((item, index) => {
-                return (
-                  <div key={index}>
-                    <ol>{item}</ol>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div>
-              <h1>The timer begins when you click ready!</h1>
-              <button onClick={this.readyUp}> READY! </button>
-            </div>
+      <div
+        id="row-container"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-around",
+        }}
+      >
+        <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
+          {!this.video.current && (
+            <h4 style={{ width: 400, height: 400 }}>Grabbing webcam feed...</h4>
           )}
+          <video
+            style={{ borderRadius: 5 }}
+            ref={this.video}
+            autoPlay={true}
+          ></video>
+
+          <div>
+            {this.state.playerReady ? (
+              <div>
+                <p>You have 15 seconds to find one of these items!</p>
+                <h1 ref={this.counter}>15</h1>
+                {this.state.searchItems.map((item, index) => {
+                  return (
+                    <div key={index}>
+                      <ol>{item}</ol>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div>
+                <h4>The timer begins when you click ready!</h4>
+                <button onClick={this.readyUp}> READY! </button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div
+          id="right-col"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignContent: "center",
+          }}
+        >
+          <img
+            src="https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png"
+            width={400}
+            height={400}
+            style={{ objectFit: "cover" }}
+          />
         </div>
       </div>
     );

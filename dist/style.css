@@ -1,0 +1,52 @@
+/*
+font-family: 'Berkshire Swash', cursive;
+font-family: 'Fondamento', cursive;
+font-family: 'Rancho', cursive;
+font-family: 'Rock Salt', cursive;
+*/
+body {
+  background-color: rgb(54, 87, 54);
+}
+
+#intro-graph p {
+  font-family: "Fondamento", cursive;
+  font-size: 30px;
+  color: white;
+}
+
+#intro-graph h1 {
+  font-family: "Fondamento", cursive;
+  font-size: 75px;
+  color: white;
+}
+
+#intro-graph {
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+  margin-right: auto;
+  text-align: center;
+}
+
+.hunting {
+  background: linear-gradient(to bottom, #99deaa 5%, #5db32b 100%);
+  background-color: #99deaa;
+
+  display: inline-block;
+  cursor: crosshair;
+  color: #000000;
+  font-family: Georgia;
+  font-size: 17px;
+  padding: 11px 9px;
+  text-decoration: none;
+  outline: none;
+  border: none;
+  border-radius: 5px;
+}
+.hunting:hover {
+  background: linear-gradient(to bottom, #5db32b 5%, #99deaa 100%);
+  background-color: #5db32b;
+}
+.hunting:active {
+  position: relative;
+  top: 1px;
+}
