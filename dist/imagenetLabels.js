@@ -1001,4 +1001,19 @@ const labels = {
   999: "toilet tissue, toilet paper, bathroom tissue",
 };
 
-export default labels;
+function getLabels() {
+  let arr = [];
+  while (arr.length < 3) {
+    let num = Math.floor(Math.random() * 999);
+    if (arr.indexOf(num) === -1) {
+      arr.push(num);
+    }
+  }
+  return [
+    labels[arr[0]].split(",")[0],
+    labels[arr[1]].split(",")[0],
+    labels[arr[2]].split(",")[0],
+  ];
+}
+
+export { labels, getLabels };
