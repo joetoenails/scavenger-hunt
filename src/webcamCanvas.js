@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { render } from "react-dom";
 import Counter from "./counter";
-import { labels, getLabels } from "../dist/imagenetLabels";
+import { labels, getLabels } from "../public/imagenetLabels";
 
 const constraints = { audio: false, video: { width: 400, height: 400 } };
 
