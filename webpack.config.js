@@ -12,6 +12,10 @@ module.exports = {
       },
     ],
   },
+  devtool: "source-map",
+  watchOptions: {
+    ignored: /node_modules/,
+  },
   resolve: {
     extensions: ["*", ".js", ".jsx"],
   },
@@ -19,7 +23,7 @@ module.exports = {
     path: path.resolve(__dirname, "./public"),
     filename: "bundle.js",
   },
-  plugins: [new webpack.HotModuleReplacementPlugin()],
+
   devServer: {
     contentBase: path.resolve(__dirname, "./public"),
     hot: true,

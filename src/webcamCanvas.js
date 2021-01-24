@@ -5,7 +5,6 @@ import { labels, getLabels } from "../public/imagenetLabels";
 
 const constraints = { audio: false, video: { width: 400, height: 400 } };
 
-//
 class WebcamCanvas extends React.Component {
   constructor(props) {
     super(props);

@@ -19,17 +19,16 @@ const styles = {
 };
 
 class WelcomeLoader extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       isModelLoaded: false,
       model: null,
       videoSource: null,
+      remoteSource: null,
       launchGame: false,
     };
-    this.image = React.createRef();
     this.getMedia = this.getMedia.bind(this);
-    this.videoRef = React.createRef();
   }
 
   async componentDidMount() {
@@ -49,6 +48,9 @@ class WelcomeLoader extends React.Component {
   }
 
   render() {
+    console.log("MY SOCKET ON PROPS:", this.props.mySocket);
+    console.log("OTHER SOCKET ON PROPS:", this.props.foreignSocket);
+
     if (this.state.launchGame) {
       return (
         <StyleRoot>
@@ -56,6 +58,7 @@ class WelcomeLoader extends React.Component {
             <WebcamCanvas
               model={this.state.model}
               videoSource={this.state.videoSource}
+              remoteSource={this.state.remoteSource}
             />
           </div>
         </StyleRoot>
