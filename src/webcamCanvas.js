@@ -5,6 +5,7 @@ import { labels, getLabels } from "../public/imagenetLabels";
 
 const constraints = { audio: false, video: { width: 400, height: 400 } };
 
+//
 class WebcamCanvas extends React.Component {
   constructor(props) {
     super(props);
@@ -16,7 +17,8 @@ class WebcamCanvas extends React.Component {
       searchItems: [...getLabels(), "coffee mug"],
     };
     //refs
-    this.video = React.createRef();
+    this.localVideo = React.createRef();
+    this.remoteVideo = React.createRef();
 
     //bindings
     this.readyUp = this.readyUp.bind(this);
@@ -25,7 +27,9 @@ class WebcamCanvas extends React.Component {
   }
 
   async predict() {
-    const predictions = await this.props.model.classify(this.video.current);
+    const predictions = await this.props.model.classify(
+      this.LocalVideo.current
+    );
     return predictions;
   }
 
@@ -47,8 +51,9 @@ class WebcamCanvas extends React.Component {
   }
 
   render() {
-    if (this.video.current) {
-      this.video.current.srcObject = this.props.videoSource;
+    if (this.localVideo.current && this.remoteVideo.current) {
+      this.localVideo.current.srcObject = this.props.localStream;
+      this.remoteVideo.current.srcObject = this.props.remoteStream;
     }
 
     return (
@@ -61,10 +66,10 @@ class WebcamCanvas extends React.Component {
         }}
       >
         <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
-          {!this.video.current && <h4>Grabbing webcam feed...</h4>}
+          {!this.localVideo.current && <h4>Grabbing webcam feed...</h4>}
           <video
             style={{ borderRadius: 5 }}
-            ref={this.video}
+            ref={this.localVideo}
             autoPlay={true}
           ></video>
 
@@ -94,12 +99,11 @@ class WebcamCanvas extends React.Component {
             alignContent: "center",
           }}
         >
-          <img
-            src="https://user-images.githubusercontent.com/194400/49531010-48dad180-f8b1-11e8-8d89-1e61320e1d82.png"
-            width={400}
-            height={400}
-            style={{ objectFit: "cover" }}
-          />
+          <video
+            style={{ borderRadius: 5, borderColor: "white", borderWidth: 5 }}
+            ref={this.remoteVideo}
+            autoPlay={true}
+          ></video>
         </div>
       </div>
     );

@@ -8,6 +8,8 @@ const clientSocket = createClientSocket(window.location.origin);
 function OpponentWait(props) {
   const [ready, setReady] = useState(false);
   const [socketInfo, setSocketInfo] = useState(null);
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
 
   clientSocket.on("connect", () => {
     console.log("Connected to server with id ", clientSocket.id);
@@ -22,52 +24,8 @@ function OpponentWait(props) {
     setReady(false);
   });
 
-  const callUser = async (socketId) => {
-    const connection = await new window.RTCPeerConnection();
-
-    const offer = await connection.createOffer();
-    await connection.setLocalDescription(new RTCSessionDescription(offer));
-
-    clientSocket.emit("call-user", {
-      offer,
-      to: socketId,
-    });
-
-    clientSocket.on("call-made", async (data) => {
-      console.log("here???");
-      await connection.setRemoteDescription(
-        new RTCSessionDescription(data.offer)
-      );
-      const answer = await connection.createAnswer();
-      await connection.setLocalDescription(new RTCSessionDescription(answer));
-
-      clientSocket.emit("make-answer", {
-        answer,
-        to: data.socket,
-      });
-    });
-
-    clientSocket.on("answer-made", async (data) => {
-      await connection.setRemoteDescription(
-        new RTCSessionDescription(data.answer)
-      );
-      console.log("here??");
-    });
-  };
-
   if (ready) {
-    return (
-      <div>
-        <button
-          onClick={() => {
-            callUser(socketInfo[1]);
-          }}
-        >
-          Test
-        </button>
-        <WelcomeLoader sockets={socketInfo} clientSocket={clientSocket} />
-      </div>
-    );
+    return <WelcomeLoader socketInfo={socketInfo} socket={clientSocket} />;
   } else {
     return (
       <h1 className="headLine">
