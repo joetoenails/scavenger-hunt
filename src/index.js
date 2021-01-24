@@ -7,37 +7,30 @@ const clientSocket = createClientSocket(window.location.origin);
 const { RTCPeerConnection, RTCSessionDescription } = window;
 
 function OpponentWait(props) {
-  const mySocket = useRef(null);
-  const [otherSocket, setOtherSocket] = useState(null);
+  const [ready, setReady] = useState(false);
+  const [socketInfo, setSocketInfo] = useState(null);
 
   clientSocket.on("connect", () => {
     console.log("Connected to server with id ", clientSocket.id);
-    mySocket.current = clientSocket.id;
   });
 
-  clientSocket.on("userJoin", (data) => {
-    if (!otherSocket) {
-      setOtherSocket(data);
-    }
+  clientSocket.on("usersReady", (data) => {
+    setReady(true);
+    setSocketInfo(data);
   });
 
-  // async function connectUser(otherSocketId) {
-  //   const offer = await peerConnection.createOffer();
-  //   await peerConnection.setLocalDescription(new RTCSessionDescription(offer));
+  clientSocket.on("notReady", (data) => {
+    setReady(false);
+  });
 
-  //   socket.emit("call-user", {
-  //     offer,
-  //     to: socketId,
-  //   });
-  // }
-
-  console.log("OTHER?? ", otherSocket);
-  if (otherSocket) {
-    return (
-      <WelcomeLoader mySocket={clientSocket.id} foreignSocket={otherSocket} />
-    );
+  if (ready) {
+    return <WelcomeLoader sockets={socketInfo} />;
   } else {
-    return <h1>Waiting for opponent...</h1>;
+    return (
+      <h1 className="headLine">
+        Welcome hunter! Please wait for your opponent to join...
+      </h1>
+    );
   }
 }
 

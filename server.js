@@ -19,9 +19,31 @@ let activeSockets = [];
 
 io.on("connection", function (socket) {
   console.log("A new client has connected!");
-  console.log(socket.id);
 
-  socket.broadcast.emit("userJoin", socket.id);
+  if (activeSockets.length === 2) {
+    activeSockets.shift();
+    activeSockets.push(socket.id);
+  } else {
+    activeSockets.push(socket.id);
+  }
 
-  socket.on("call-user", () => {});
+  if (activeSockets.length === 2) {
+    socket.broadcast.emit("usersReady", activeSockets);
+    socket.emit("usersReady", activeSockets);
+  } else {
+    socket.broadcast.emit("notReady", "nope");
+    socket.emit("notReady", "nope");
+  }
+
+  socket.on("disconnect", () => {
+    activeSockets = activeSockets.filter((conn) => conn !== socket.id);
+    console.log(socket.id, " has left the building");
+    if (activeSockets.length === 2) {
+      socket.broadcast.emit("usersReady", activeSockets);
+      socket.emit("usersReady", activeSockets);
+    } else {
+      socket.broadcast.emit("notReady", "nope");
+      socket.emit("notReady", "nope");
+    }
+  });
 });

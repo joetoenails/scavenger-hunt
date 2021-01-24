@@ -20,6 +20,12 @@ body {
   color: white;
 }
 
+.headLine {
+  font-family: "Fondamento", cursive;
+  font-size: 75px;
+  color: white;
+}
+
 #intro-graph {
   margin-top: 10vh;
   margin-bottom: 10vh;

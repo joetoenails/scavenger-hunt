@@ -48,8 +48,7 @@ class WelcomeLoader extends React.Component {
   }
 
   render() {
-    console.log("MY SOCKET ON PROPS:", this.props.mySocket);
-    console.log("OTHER SOCKET ON PROPS:", this.props.foreignSocket);
+    console.log("PROPS", this.props.sockets);
 
     if (this.state.launchGame) {
       return (
