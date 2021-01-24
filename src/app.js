@@ -48,8 +48,6 @@ class WelcomeLoader extends React.Component {
   }
 
   render() {
-    console.log("PROPS", this.props.sockets);
-
     if (this.state.launchGame) {
       return (
         <StyleRoot>

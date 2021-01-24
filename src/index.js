@@ -4,7 +4,6 @@ import WelcomeLoader from "./app";
 import createClientSocket from "socket.io-client";
 
 const clientSocket = createClientSocket(window.location.origin);
-const { RTCPeerConnection, RTCSessionDescription } = window;
 
 function OpponentWait(props) {
   const [ready, setReady] = useState(false);
@@ -23,12 +22,56 @@ function OpponentWait(props) {
     setReady(false);
   });
 
+  const callUser = async (socketId) => {
+    const connection = await new window.RTCPeerConnection();
+
+    const offer = await connection.createOffer();
+    await connection.setLocalDescription(new RTCSessionDescription(offer));
+
+    clientSocket.emit("call-user", {
+      offer,
+      to: socketId,
+    });
+
+    clientSocket.on("call-made", async (data) => {
+      console.log("here???");
+      await connection.setRemoteDescription(
+        new RTCSessionDescription(data.offer)
+      );
+      const answer = await connection.createAnswer();
+      await connection.setLocalDescription(new RTCSessionDescription(answer));
+
+      clientSocket.emit("make-answer", {
+        answer,
+        to: data.socket,
+      });
+    });
+
+    clientSocket.on("answer-made", async (data) => {
+      await connection.setRemoteDescription(
+        new RTCSessionDescription(data.answer)
+      );
+      console.log("here??");
+    });
+  };
+
   if (ready) {
-    return <WelcomeLoader sockets={socketInfo} />;
+    return (
+      <div>
+        <button
+          onClick={() => {
+            callUser(socketInfo[1]);
+          }}
+        >
+          Test
+        </button>
+        <WelcomeLoader sockets={socketInfo} clientSocket={clientSocket} />
+      </div>
+    );
   } else {
     return (
       <h1 className="headLine">
-        Welcome hunter! Please wait for your opponent to join...
+        Welcome...waiting for another hunter to join...
       </h1>
     );
   }
