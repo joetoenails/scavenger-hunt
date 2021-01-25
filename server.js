@@ -15,49 +15,38 @@ const server = app.listen(1337, function () {
 
 var io = socketio(server);
 
-let activeSockets = [];
+let connectedUsers = [];
 
 io.on("connection", function (socket) {
   console.log("A new client has connected!");
 
-  if (activeSockets.length === 2) {
-    activeSockets.shift();
-    activeSockets.push(socket.id);
-  } else {
-    activeSockets.push(socket.id);
-  }
+  connectedUsers.push(socket.id);
 
-  if (activeSockets.length === 2) {
-    socket.broadcast.emit("usersReady", activeSockets);
-    socket.emit("usersReady", activeSockets);
-  } else {
-    socket.broadcast.emit("notReady", "nope");
-    socket.emit("notReady", "nope");
-  }
+  // Emit to myself the other users connected array to start a connection with each them
+  const otherUsers = connectedUsers.filter(
+    (socketId) => socketId !== socket.id
+  );
+  socket.emit("other-users", otherUsers);
 
+  // Send Offer To Start Connection
+  socket.on("offer", (socketId, description) => {
+    socket.to(socketId).emit("offer", socket.id, description);
+  });
+
+  // Send Answer From Offer Request
+  socket.on("answer", (socketId, description) => {
+    socket.to(socketId).emit("answer", description);
+  });
+
+  // Send Signals to Establish the Communication Channel
+  socket.on("candidate", (socketId, candidate) => {
+    socket.to(socketId).emit("candidate", candidate);
+  });
+
+  // Remove client when socket is disconnected
   socket.on("disconnect", () => {
-    activeSockets = activeSockets.filter((conn) => conn !== socket.id);
-    console.log(socket.id, " has left the building");
-    if (activeSockets.length === 2) {
-      socket.broadcast.emit("usersReady", activeSockets);
-      socket.emit("usersReady", activeSockets);
-    } else {
-      socket.broadcast.emit("notReady", "nope");
-      socket.emit("notReady", "nope");
-    }
-  });
-
-  socket.on("call-user", (data) => {
-    socket.to(data.to).emit("call-made", {
-      offer: data.offer,
-      socket: socket.id,
-    });
-  });
-
-  socket.on("make-answer", (data) => {
-    socket.to(data.to).emit("answer-made", {
-      socket: socket.id,
-      answer: data.answer,
-    });
+    connectedUsers = connectedUsers.filter(
+      (socketId) => socketId !== socket.id
+    );
   });
 });

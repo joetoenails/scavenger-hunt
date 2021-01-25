@@ -24,11 +24,8 @@ class WelcomeLoader extends React.Component {
     this.state = {
       isModelLoaded: false,
       model: null,
-      localStream: null,
-      remoteStream: null,
       launchGame: false,
     };
-    this.callUser = this.callUser.bind(this);
   }
 
   async componentDidMount() {
@@ -36,69 +33,12 @@ class WelcomeLoader extends React.Component {
     this.setState({ isModelLoaded: true, model: model });
   }
 
-  async callUser(clientSocket, socketId) {
-    const connection = await new window.RTCPeerConnection();
-
-    const offer = await connection.createOffer();
-    await connection.setLocalDescription(new RTCSessionDescription(offer));
-
-    clientSocket.emit("call-user", {
-      offer,
-      to: socketId,
-    });
-
-    clientSocket.on("call-made", async (data) => {
-      console.log("here???");
-      await connection.setRemoteDescription(
-        new RTCSessionDescription(data.offer)
-      );
-      const answer = await connection.createAnswer();
-      await connection.setLocalDescription(new RTCSessionDescription(answer));
-
-      clientSocket.emit("make-answer", {
-        answer,
-        to: data.socket,
-      });
-    });
-
-    clientSocket.on("answer-made", async (data) => {
-      await connection.setRemoteDescription(
-        new RTCSessionDescription(data.answer)
-      );
-    });
-
-    const localstream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { width: 400, height: 400 },
-    });
-
-    this.setState({ localStream: localstream });
-
-    localstream
-      .getTracks()
-      .forEach((track) => connection.addTrack(track, localstream));
-
-    const remoteStream = new MediaStream();
-
-    connection.addEventListener("track", async (event) => {
-      remoteStream.addTrack(event.track, remoteStream);
-    });
-
-    this.setState({ remoteStream: remoteStream });
-  }
-
   render() {
-    console.log("state: ", this.state);
     if (this.state.launchGame) {
       return (
         <StyleRoot>
           <div style={styles.fadeIn}>
-            <WebcamCanvas
-              socketInfo={this.props.socketInfo}
-              model={this.state.model}
-              localStream={this.state.localStream}
-              remoteStream={this.state.remoteStream}
-            />
+            <WebcamCanvas model={this.state.model} />
           </div>
         </StyleRoot>
       );
@@ -130,7 +70,6 @@ class WelcomeLoader extends React.Component {
                 style={styles.fadeIn}
                 onClick={() => {
                   this.setState({ launchGame: true });
-                  this.callUser(this.props.socket, this.props.socketInfo[1]);
                 }}
               >
                 Let's go hunting!

@@ -3,60 +3,128 @@ import { render } from "react-dom";
 import Counter from "./counter";
 import { labels, getLabels } from "../public/imagenetLabels";
 
-const constraints = { audio: false, video: { width: 400, height: 400 } };
+function checkMatch(predictions, searchItems) {
+  let found = false;
+  const top1 = predictions[0];
+  const top2 = predictions[1];
 
-//
-class WebcamCanvas extends React.Component {
-  constructor(props) {
-    super(props);
-    //state
-    this.state = {
-      counter: 15,
-      videoLoaded: false,
-      playerReady: false,
-      searchItems: [...getLabels(), "coffee mug"],
-    };
-    //refs
-    this.localVideo = React.createRef();
-    this.remoteVideo = React.createRef();
-
-    //bindings
-    this.readyUp = this.readyUp.bind(this);
-    this.checkMatch = this.checkMatch.bind(this);
-    this.predict = this.predict.bind(this);
-  }
-
-  async predict() {
-    const predictions = await this.props.model.classify(
-      this.LocalVideo.current
-    );
-    return predictions;
-  }
-
-  readyUp() {
-    this.setState({ playerReady: true });
-  }
-
-  checkMatch(predictions, searchItems) {
-    let found = false;
-    const top1 = predictions[0];
-    const top2 = predictions[1];
-
-    searchItems.forEach((item) => {
-      if (item === top1.className || item === top2.className) {
-        found = true;
-      }
-    });
-    return found;
-  }
-
-  render() {
-    if (this.localVideo.current && this.remoteVideo.current) {
-      this.localVideo.current.srcObject = this.props.localStream;
-      this.remoteVideo.current.srcObject = this.props.remoteStream;
+  searchItems.forEach((item) => {
+    if (item === top1.className || item === top2.className) {
+      found = true;
     }
+  });
+  return found;
+}
 
-    return (
+function WebcamCanvas(props) {
+  const localVideo = React.useRef();
+  const remoteVideo = React.useRef();
+  const searchItems = React.useRef([...getLabels(), "coffee mug"]);
+  const [playerReady, setReady] = React.useState(false);
+
+  const predict = async () => {
+    const predictions = await props.model.classify(localVideo.current);
+    return predictions;
+  };
+
+  navigator.mediaDevices
+    .getUserMedia({ video: true, audio: false })
+    .then((stream) => {
+      // Show My Video
+
+      localVideo.current.srcObject = stream;
+
+      // Start a Peer Connection to Transmit Stream
+      initConnection(stream);
+    })
+    .catch((error) => console.log(error));
+
+  const initConnection = (stream) => {
+    const socket = io("/");
+    let localConnection;
+    let remoteConnection;
+    let localChannel;
+    let remoteChannel;
+
+    // Start a RTCPeerConnection to each client
+    socket.on("other-users", (otherUsers) => {
+      // Ignore when not exists other users connected
+      if (!otherUsers || !otherUsers.length) return;
+
+      const socketId = otherUsers[0];
+
+      // Ininit peer connection
+      localConnection = new RTCPeerConnection();
+
+      // Add all tracks from stream to peer connection
+      stream
+        .getTracks()
+        .forEach((track) => localConnection.addTrack(track, stream));
+
+      // Send Candidtates to establish a channel communication to send stream and data
+      localConnection.onicecandidate = ({ candidate }) => {
+        candidate && socket.emit("candidate", socketId, candidate);
+      };
+
+      // Receive stream from remote client and add to remote video area
+      localConnection.ontrack = ({ streams: [stream] }) => {
+        remoteVideo.current.srcObject = stream;
+      };
+
+      // Create Offer, Set Local Description and Send Offer to other users connected
+      localConnection
+        .createOffer()
+        .then((offer) => localConnection.setLocalDescription(offer))
+        .then(() => {
+          socket.emit("offer", socketId, localConnection.localDescription);
+        });
+    });
+
+    // Receive Offer From Other Client
+    socket.on("offer", (socketId, description) => {
+      // Ininit peer connection
+      remoteConnection = new RTCPeerConnection();
+
+      // Add all tracks from stream to peer connection
+      stream
+        .getTracks()
+        .forEach((track) => remoteConnection.addTrack(track, stream));
+
+      // Send Candidtates to establish a channel communication to send stream and data
+      remoteConnection.onicecandidate = ({ candidate }) => {
+        candidate && socket.emit("candidate", socketId, candidate);
+      };
+
+      // Receive stream from remote client and add to remote video area
+      remoteConnection.ontrack = ({ streams: [stream] }) => {
+        remoteVideo.current.srcObject = stream;
+      };
+
+      // Set Local And Remote description and create answer
+      remoteConnection
+        .setRemoteDescription(description)
+        .then(() => remoteConnection.createAnswer())
+        .then((answer) => remoteConnection.setLocalDescription(answer))
+        .then(() => {
+          socket.emit("answer", socketId, remoteConnection.localDescription);
+        });
+    });
+
+    // Receive Answer to establish peer connection
+    socket.on("answer", (description) => {
+      localConnection.setRemoteDescription(description);
+    });
+
+    // Receive candidates and add to peer connection
+    socket.on("candidate", (candidate) => {
+      // GET Local or Remote Connection
+      const conn = localConnection || remoteConnection;
+      conn.addIceCandidate(new RTCIceCandidate(candidate));
+    });
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column" }}>
       <div
         id="row-container"
         style={{
@@ -66,30 +134,12 @@ class WebcamCanvas extends React.Component {
         }}
       >
         <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
-          {!this.localVideo.current && <h4>Grabbing webcam feed...</h4>}
+          {!localVideo.current && <h4>Grabbing webcam feed...</h4>}
           <video
             style={{ borderRadius: 5 }}
-            ref={this.localVideo}
+            ref={localVideo}
             autoPlay={true}
           ></video>
-
-          <div>
-            {this.state.playerReady ? (
-              <div>
-                <p>You have 15 seconds to find one of these items!</p>
-                <Counter
-                  searchItems={this.state.searchItems}
-                  checkMatch={this.checkMatch}
-                  predict={this.predict}
-                />
-              </div>
-            ) : (
-              <div>
-                <h4>The timer begins when you click ready!</h4>
-                <button onClick={this.readyUp}> READY! </button>
-              </div>
-            )}
-          </div>
         </div>
         <div
           id="right-col"
@@ -101,13 +151,36 @@ class WebcamCanvas extends React.Component {
         >
           <video
             style={{ borderRadius: 5, borderColor: "white", borderWidth: 5 }}
-            ref={this.remoteVideo}
+            ref={remoteVideo}
             autoPlay={true}
           ></video>
         </div>
       </div>
-    );
-  }
+      <div>
+        {playerReady ? (
+          <div>
+            <p>You have 15 seconds to find one of these items!</p>
+            <Counter
+              searchItems={searchItems.current}
+              checkMatch={checkMatch}
+              predict={predict}
+            />
+          </div>
+        ) : (
+          <div>
+            <h4>The timer begins when you click ready!</h4>
+            <button
+              onClick={() => {
+                setReady(true);
+              }}
+            >
+              READY!
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export { WebcamCanvas };
