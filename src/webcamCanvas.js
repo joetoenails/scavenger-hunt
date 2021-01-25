@@ -22,8 +22,15 @@ function WebcamCanvas(props) {
   const searchItems = React.useRef([...getLabels(), "coffee mug"]);
   const [playerReady, setReady] = React.useState(false);
 
-  const predict = async () => {
+  const predictLocal = async () => {
     const predictions = await props.model.classify(localVideo.current);
+
+    return predictions;
+  };
+
+  const predictRemote = async () => {
+    const predictions = await props.model.classify(remoteVideo.current);
+
     return predictions;
   };
 
@@ -124,7 +131,13 @@ function WebcamCanvas(props) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignContent: "center",
+      }}
+    >
       <div
         id="row-container"
         style={{
@@ -134,9 +147,8 @@ function WebcamCanvas(props) {
         }}
       >
         <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
-          {!localVideo.current && <h4>Grabbing webcam feed...</h4>}
           <video
-            style={{ borderRadius: 5 }}
+            style={{ width: 400, height: 400, margin: 0 }}
             ref={localVideo}
             autoPlay={true}
           ></video>
@@ -146,38 +158,22 @@ function WebcamCanvas(props) {
           style={{
             display: "flex",
             flexDirection: "column",
-            alignContent: "center",
           }}
         >
           <video
-            style={{ borderRadius: 5, borderColor: "white", borderWidth: 5 }}
+            style={{ width: 400, height: 400, margin: 0 }}
             ref={remoteVideo}
             autoPlay={true}
           ></video>
         </div>
       </div>
-      <div>
-        {playerReady ? (
-          <div>
-            <p>You have 15 seconds to find one of these items!</p>
-            <Counter
-              searchItems={searchItems.current}
-              checkMatch={checkMatch}
-              predict={predict}
-            />
-          </div>
-        ) : (
-          <div>
-            <h4>The timer begins when you click ready!</h4>
-            <button
-              onClick={() => {
-                setReady(true);
-              }}
-            >
-              READY!
-            </button>
-          </div>
-        )}
+      <div id="counterSearch" style={{ alignSelf: "center" }}>
+        <Counter
+          searchItems={searchItems.current}
+          checkMatch={checkMatch}
+          predictLocal={predictLocal}
+          predictRemote={predictRemote}
+        />
       </div>
     </div>
   );

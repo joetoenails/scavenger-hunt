@@ -3,13 +3,14 @@ import React, { useEffect, useRef } from "react";
 class Counter extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { counter: 15, gameWon: false, gameLost: false };
+    this.state = {
+      counter: 15,
+      gameWon: false,
+      gameLost: false,
+      playerReady: false,
+    };
     this.countdown = this.countdown.bind(this);
     this.resetGame = this.resetGame.bind(this);
-  }
-
-  componentDidMount() {
-    this.countdown();
   }
 
   countdown() {
@@ -25,9 +26,16 @@ class Counter extends React.Component {
 
     searcher = setInterval(async () => {
       console.log("searching...");
-      const currentPredictions = await this.props.predict();
-      if (this.props.checkMatch(currentPredictions, this.props.searchItems)) {
-        this.setState({ gameWon: true });
+      const remotePredictions = await this.props.predictRemote();
+      const localPredictions = await this.props.predictLocal();
+
+      if (this.props.checkMatch(localPredictions, this.props.searchItems)) {
+        this.setState({ gameWon: true, winner: "Player One" });
+        clearTimeout(searcher);
+        clearTimeout(timer);
+      }
+      if (this.props.checkMatch(remotePredictions, this.props.searchItems)) {
+        this.setState({ gameWon: true, winner: "Player Two" });
         clearTimeout(searcher);
         clearTimeout(timer);
       }
@@ -40,9 +48,22 @@ class Counter extends React.Component {
   }
 
   render() {
+    if (!this.state.playerReady) {
+      return (
+        <button
+          onClick={() => {
+            this.setState({ playerReady: true });
+            this.countdown();
+          }}
+        >
+          Ready?
+        </button>
+      );
+    }
+
     return (
       <div>
-        {this.state.gameWon && <p>Winner!</p>}
+        {this.state.gameWon && <h2>{this.state.winner} Wins!</h2>}
         {this.state.gameLost && <p>Loser!</p>}
         {this.state.gameLost ||
           (this.state.gameWon && (
