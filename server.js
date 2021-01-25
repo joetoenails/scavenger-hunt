@@ -3,14 +3,16 @@ const express = require("express");
 const app = express();
 const socketio = require("socket.io");
 
+const PORT = proce.ENV.PORT || 1337;
+
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-const server = app.listen(1337, function () {
-  console.log("The server is listening on port 1337!");
+const server = app.listen(PORT, function () {
+  console.log(`The server is listening on port ${PORT}`);
 });
 
 var io = socketio(server);
