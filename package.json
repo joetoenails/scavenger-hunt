@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-watch": "webpack -w",
+    "build": "webpack",
     "deploy": "script/deploy",
-    "start": "npm run build-watch & nodemon server.js",
     "start-dev": "NODE_ENV='development' npm run build-watch & NODE_ENV='development' nodemon server.js"
   },
   "keywords": [],
