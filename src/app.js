@@ -5,8 +5,6 @@ import { WebcamCanvas } from "./webcamCanvas";
 import Radium, { StyleRoot } from "radium";
 import { rubberBand, fadeIn } from "react-animations";
 
-const constraints = { audio: false, video: { width: 400, height: 400 } };
-
 const styles = {
   fadeIn: {
     animation: "x 1s",
