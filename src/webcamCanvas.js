@@ -18,7 +18,7 @@ function checkMatch(predictions, searchItems) {
 }
 
 function WebcamCanvas(props) {
-  let clientSocket;
+  const clientSocket = React.useRef();
   const localVideo = React.useRef();
   const remoteVideo = React.useRef();
   const readyButton = React.useRef();
@@ -53,15 +53,15 @@ function WebcamCanvas(props) {
   }, []);
 
   const initConnection = (stream) => {
-    clientSocket = io();
-    console.log("CLIENT SOCKET: ", clientSocket);
+    clientSocket.current = io();
+    console.log("CLIENT SOCKET: ", clientSocket.current);
     let localConnection;
     let remoteConnection;
     let localChannel;
     let remoteChannel;
 
     // Start a RTCPeerConnection to each client
-    clientSocket.on("other-users", (otherUsers) => {
+    clientSocket.current.on("other-users", (otherUsers) => {
       // Ignore when not exists other users connected
       if (!otherUsers || !otherUsers.length) return;
 
@@ -77,7 +77,8 @@ function WebcamCanvas(props) {
 
       // Send Candidtates to establish a channel communication to send stream and data
       localConnection.onicecandidate = ({ candidate }) => {
-        candidate && clientSocket.emit("candidate", socketId, candidate);
+        candidate &&
+          clientSocket.current.emit("candidate", socketId, candidate);
       };
 
       // Receive stream from remote client and add to remote video area
@@ -92,7 +93,7 @@ function WebcamCanvas(props) {
         .createOffer()
         .then((offer) => localConnection.setLocalDescription(offer))
         .then(() => {
-          clientSocket.emit(
+          clientSocket.current.emit(
             "offer",
             socketId,
             localConnection.localDescription
@@ -101,7 +102,7 @@ function WebcamCanvas(props) {
     });
 
     // Receive Offer From Other Client
-    clientSocket.on("offer", (socketId, description) => {
+    clientSocket.current.on("offer", (socketId, description) => {
       // Ininit peer connection
       remoteConnection = new RTCPeerConnection();
 
@@ -112,7 +113,8 @@ function WebcamCanvas(props) {
 
       // Send Candidtates to establish a channel communication to send stream and data
       remoteConnection.onicecandidate = ({ candidate }) => {
-        candidate && clientSocket.emit("candidate", socketId, candidate);
+        candidate &&
+          clientSocket.current.emit("candidate", socketId, candidate);
       };
 
       // Receive stream from remote client and add to remote video area
@@ -128,7 +130,7 @@ function WebcamCanvas(props) {
         .then(() => remoteConnection.createAnswer())
         .then((answer) => remoteConnection.setLocalDescription(answer))
         .then(() => {
-          clientSocket.emit(
+          clientSocket.current.emit(
             "answer",
             socketId,
             remoteConnection.localDescription
@@ -137,23 +139,23 @@ function WebcamCanvas(props) {
     });
 
     // Receive Answer to establish peer connection
-    clientSocket.on("answer", (description) => {
+    clientSocket.current.on("answer", (description) => {
       localConnection.setRemoteDescription(description);
     });
 
     // Receive candidates and add to peer connection
-    clientSocket.on("candidate", (candidate) => {
+    clientSocket.current.on("candidate", (candidate) => {
       // GET Local or Remote Connection
       const conn = localConnection || remoteConnection;
       conn.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
-    clientSocket.on("allPlayersReady", (data) => {
+    clientSocket.current.on("allPlayersReady", (data) => {
       searchItems.current = data;
       readyCountdown();
     });
 
-    clientSocket.on("refreshClients", () => {
+    clientSocket.current.on("refreshClients", () => {
       setReadyFalse();
     });
   };
@@ -216,7 +218,7 @@ function WebcamCanvas(props) {
             ref={readyButton}
             className="hunting"
             onClick={() => {
-              clientSocket.emit("readyUp");
+              clientSocket.current.emit("readyUp");
             }}
           >
             Ready!
@@ -236,6 +238,7 @@ function WebcamCanvas(props) {
             predictLocal={predictLocal}
             predictRemote={predictRemote}
             setReadyFalse={setReadyFalse}
+            clientSocket={clientSocket.current}
           />
         )}
       </div>
