@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const socketio = require("socket.io");
 
-const PORT = process.env.PORT || 1337;
+const PORT = process.env.PORT || 8080;
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -50,5 +50,6 @@ io.on("connection", function (socket) {
     connectedUsers = connectedUsers.filter(
       (socketId) => socketId !== socket.id
     );
+    console.log("peace");
   });
 });

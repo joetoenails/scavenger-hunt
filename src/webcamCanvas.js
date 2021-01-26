@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { render } from "react-dom";
 import Counter from "./counter";
 import { labels, getLabels } from "../public/imagenetLabels";
+import { io } from "socket.io-client";
 
 function checkMatch(predictions, searchItems) {
   let found = false;
@@ -20,7 +21,7 @@ function WebcamCanvas(props) {
   const localVideo = React.useRef();
   const remoteVideo = React.useRef();
   const searchItems = React.useRef([...getLabels(), "coffee mug"]);
-  const [playerReady, setReady] = React.useState(false);
+  const [playerReady, setPlayerReady] = useState(false);
 
   const predictLocal = async () => {
     const predictions = await props.model.classify(localVideo.current);
@@ -34,27 +35,30 @@ function WebcamCanvas(props) {
     return predictions;
   };
 
-  navigator.mediaDevices
-    .getUserMedia({ video: true, audio: false })
-    .then((stream) => {
-      // Show My Video
+  useEffect(() => {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then((stream) => {
+        // Show My Video
 
-      localVideo.current.srcObject = stream;
+        localVideo.current.srcObject = stream;
 
-      // Start a Peer Connection to Transmit Stream
-      initConnection(stream);
-    })
-    .catch((error) => console.log(error));
+        // Start a Peer Connection to Transmit Stream
+        initConnection(stream);
+      })
+      .catch((error) => console.log(error));
+  }, []);
 
   const initConnection = (stream) => {
-    const socket = io("/");
+    const clientSocket = io();
+    console.log("CLIENT SOCKET: ", clientSocket);
     let localConnection;
     let remoteConnection;
     let localChannel;
     let remoteChannel;
 
     // Start a RTCPeerConnection to each client
-    socket.on("other-users", (otherUsers) => {
+    clientSocket.on("other-users", (otherUsers) => {
       // Ignore when not exists other users connected
       if (!otherUsers || !otherUsers.length) return;
 
@@ -70,12 +74,14 @@ function WebcamCanvas(props) {
 
       // Send Candidtates to establish a channel communication to send stream and data
       localConnection.onicecandidate = ({ candidate }) => {
-        candidate && socket.emit("candidate", socketId, candidate);
+        candidate && clientSocket.emit("candidate", socketId, candidate);
       };
 
       // Receive stream from remote client and add to remote video area
       localConnection.ontrack = ({ streams: [stream] }) => {
         remoteVideo.current.srcObject = stream;
+        remoteVideo.current.muted = true;
+        remoteVideo.current.playsInline = true;
       };
 
       // Create Offer, Set Local Description and Send Offer to other users connected
@@ -83,12 +89,16 @@ function WebcamCanvas(props) {
         .createOffer()
         .then((offer) => localConnection.setLocalDescription(offer))
         .then(() => {
-          socket.emit("offer", socketId, localConnection.localDescription);
+          clientSocket.emit(
+            "offer",
+            socketId,
+            localConnection.localDescription
+          );
         });
     });
 
     // Receive Offer From Other Client
-    socket.on("offer", (socketId, description) => {
+    clientSocket.on("offer", (socketId, description) => {
       // Ininit peer connection
       remoteConnection = new RTCPeerConnection();
 
@@ -99,12 +109,14 @@ function WebcamCanvas(props) {
 
       // Send Candidtates to establish a channel communication to send stream and data
       remoteConnection.onicecandidate = ({ candidate }) => {
-        candidate && socket.emit("candidate", socketId, candidate);
+        candidate && clientSocket.emit("candidate", socketId, candidate);
       };
 
       // Receive stream from remote client and add to remote video area
       remoteConnection.ontrack = ({ streams: [stream] }) => {
         remoteVideo.current.srcObject = stream;
+        remoteVideo.current.muted = true;
+        remoteVideo.current.playsInline = true;
       };
 
       // Set Local And Remote description and create answer
@@ -113,21 +125,29 @@ function WebcamCanvas(props) {
         .then(() => remoteConnection.createAnswer())
         .then((answer) => remoteConnection.setLocalDescription(answer))
         .then(() => {
-          socket.emit("answer", socketId, remoteConnection.localDescription);
+          clientSocket.emit(
+            "answer",
+            socketId,
+            remoteConnection.localDescription
+          );
         });
     });
 
     // Receive Answer to establish peer connection
-    socket.on("answer", (description) => {
+    clientSocket.on("answer", (description) => {
       localConnection.setRemoteDescription(description);
     });
 
     // Receive candidates and add to peer connection
-    socket.on("candidate", (candidate) => {
+    clientSocket.on("candidate", (candidate) => {
       // GET Local or Remote Connection
       const conn = localConnection || remoteConnection;
       conn.addIceCandidate(new RTCIceCandidate(candidate));
     });
+  };
+
+  const setReadyFalse = () => {
+    setPlayerReady(false);
   };
 
   return (
@@ -164,16 +184,31 @@ function WebcamCanvas(props) {
             style={{ width: 400, height: 400, margin: 0 }}
             ref={remoteVideo}
             autoPlay={true}
+            muted={true}
+            playsInline={true}
           ></video>
         </div>
       </div>
       <div id="counterSearch" style={{ alignSelf: "center" }}>
-        <Counter
-          searchItems={searchItems.current}
-          checkMatch={checkMatch}
-          predictLocal={predictLocal}
-          predictRemote={predictRemote}
-        />
+        {!playerReady && (
+          <button
+            className="hunting"
+            onClick={() => {
+              setPlayerReady(true);
+            }}
+          >
+            Ready!
+          </button>
+        )}
+        {playerReady && (
+          <Counter
+            searchItems={searchItems.current}
+            checkMatch={checkMatch}
+            predictLocal={predictLocal}
+            predictRemote={predictRemote}
+            setReadyFalse={setReadyFalse}
+          />
+        )}
       </div>
     </div>
   );
