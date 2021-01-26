@@ -26,6 +26,11 @@ body {
   color: white;
 }
 
+.gameText {
+  font-family: "Fondamento", cursive;
+  color: white;
+}
+
 #intro-graph {
   margin-top: 10vh;
   margin-bottom: 10vh;

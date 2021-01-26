@@ -7,10 +7,13 @@ class Counter extends React.Component {
       counter: 15,
       gameWon: false,
       gameLost: false,
-      playerReady: false,
     };
     this.countdown = this.countdown.bind(this);
     this.resetGame = this.resetGame.bind(this);
+  }
+
+  componentDidMount() {
+    this.countdown();
   }
 
   countdown() {
@@ -22,7 +25,7 @@ class Counter extends React.Component {
         clearTimeout(searcher);
         this.setState({ gameLost: true });
       }
-    }, 1000);
+    }, 300);
 
     searcher = setInterval(async () => {
       console.log("searching...");
@@ -30,12 +33,12 @@ class Counter extends React.Component {
       const localPredictions = await this.props.predictLocal();
 
       if (this.props.checkMatch(localPredictions, this.props.searchItems)) {
-        this.setState({ gameWon: true, winner: "Player One" });
+        this.setState({ gameWon: true, winner: "You are" });
         clearTimeout(searcher);
         clearTimeout(timer);
       }
       if (this.props.checkMatch(remotePredictions, this.props.searchItems)) {
-        this.setState({ gameWon: true, winner: "Player Two" });
+        this.setState({ gameWon: true, winner: "The other person is" });
         clearTimeout(searcher);
         clearTimeout(timer);
       }
@@ -44,40 +47,55 @@ class Counter extends React.Component {
 
   resetGame() {
     this.setState({ gameWon: false, gameLost: false, counter: 15 });
-    this.countdown();
+    this.props.setReadyFalse();
   }
 
   render() {
-    if (!this.state.playerReady) {
-      return (
-        <button
-          onClick={() => {
-            this.setState({ playerReady: true });
-            this.countdown();
-          }}
-        >
-          Ready?
-        </button>
-      );
-    }
-
     return (
-      <div>
-        {this.state.gameWon && <h2>{this.state.winner} Wins!</h2>}
-        {this.state.gameLost && <p>Loser!</p>}
-        {this.state.gameLost ||
-          (this.state.gameWon && (
-            <button onClick={this.resetGame}>Try again?</button>
-          ))}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignContent: "center",
+        }}
+      >
+        {this.state.gameWon && (
+          <h2 style={{ color: "white" }}>{this.state.winner} the winner!</h2>
+        )}
+        {this.state.gameLost && (
+          <h4 className="gameText" style={{ textAlign: "center" }}>
+            No one found found an item :(
+          </h4>
+        )}
+        {this.state.gameLost || this.state.gameWon ? (
+          <button
+            onClick={this.resetGame}
+            className="hunting"
+            style={{ width: "fit-content", alignSelf: "center" }}
+          >
+            Try again?
+          </button>
+        ) : (
+          <div></div>
+        )}
 
-        <h1>{this.state.counter}</h1>
-        {this.props.searchItems.map((item, index) => {
-          return (
-            <div key={index}>
-              <ol>{item}</ol>
-            </div>
-          );
-        })}
+        <h1 className="gameText" style={{ textAlign: "center  " }}>
+          {this.state.counter}
+        </h1>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          {this.props.searchItems.map((item, index) => {
+            return (
+              <div key={index}>
+                <h2
+                  style={{ marginLeft: 50, marginRight: 50, marginTop: 0 }}
+                  className="gameText"
+                >
+                  {item}
+                </h2>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   }
