@@ -18,6 +18,7 @@ function checkMatch(predictions, searchItems) {
 }
 
 function WebcamCanvas(props) {
+  let clientSocket;
   const localVideo = React.useRef();
   const remoteVideo = React.useRef();
   const searchItems = React.useRef([...getLabels(), "coffee mug"]);
@@ -37,7 +38,7 @@ function WebcamCanvas(props) {
 
   useEffect(() => {
     navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
+      .getUserMedia({ video: { width: 300, height: 300 }, audio: false })
       .then((stream) => {
         // Show My Video
 
@@ -50,7 +51,7 @@ function WebcamCanvas(props) {
   }, []);
 
   const initConnection = (stream) => {
-    const clientSocket = io();
+    clientSocket = io();
     console.log("CLIENT SOCKET: ", clientSocket);
     let localConnection;
     let remoteConnection;
@@ -168,7 +169,7 @@ function WebcamCanvas(props) {
       >
         <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
           <video
-            style={{ width: 400, height: 400, margin: 0 }}
+            style={{ margin: 50, border: "5px solid white", borderRadius: 15 }}
             ref={localVideo}
             autoPlay={true}
           ></video>
@@ -181,7 +182,7 @@ function WebcamCanvas(props) {
           }}
         >
           <video
-            style={{ width: 400, height: 400, margin: 0 }}
+            style={{ margin: 50, border: "5px solid white", borderRadius: 15 }}
             ref={remoteVideo}
             autoPlay={true}
             muted={true}
@@ -195,6 +196,7 @@ function WebcamCanvas(props) {
             className="hunting"
             onClick={() => {
               setPlayerReady(true);
+              clientSocket.emit("HOWDY");
             }}
           >
             Ready!

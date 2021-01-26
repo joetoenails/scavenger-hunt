@@ -5,7 +5,12 @@ font-family: 'Rancho', cursive;
 font-family: 'Rock Salt', cursive;
 */
 body {
-  background-color: rgb(54, 87, 54);
+  background: rgb(89, 171, 63);
+  background: radial-gradient(
+    circle,
+    rgb(69, 129, 50) 0%,
+    rgba(60, 83, 49, 1) 100%
+  );
 }
 
 #intro-graph p {
