@@ -217,7 +217,6 @@ function WebcamCanvas(props) {
             className="hunting"
             onClick={() => {
               clientSocket.emit("readyUp");
-              hideReadyButton();
             }}
           >
             Ready!
