@@ -104,7 +104,8 @@ function WebcamCanvas(props) {
     // Receive Offer From Other Client
     clientSocket.current.on("offer", (socketId, description) => {
       // Ininit peer connection
-      remoteConnection = new RTCPeerConnection();
+      const servers = { iceServers: [{ urls: "stun:74.125.142.127:19302" }] };
+      remoteConnection = new RTCPeerConnection(servers);
 
       // Add all tracks from stream to peer connection
       stream
