@@ -21,6 +21,7 @@ function WebcamCanvas(props) {
   let clientSocket;
   const localVideo = React.useRef();
   const remoteVideo = React.useRef();
+  const readyButton = React.useRef();
   const searchItems = React.useRef([...getLabels(), "coffee mug"]);
   const [playerReady, setPlayerReady] = useState(false);
   const [alert, setAlert] = useState(false);
@@ -150,6 +151,10 @@ function WebcamCanvas(props) {
     clientSocket.on("allPlayersReady", () => {
       readyCountdown();
     });
+
+    clientSocket.on("refreshClients", () => {
+      setReadyFalse();
+    });
   };
 
   const readyCountdown = () => {
@@ -162,6 +167,7 @@ function WebcamCanvas(props) {
 
   const setReadyFalse = () => {
     setPlayerReady(false);
+    setAlert(false);
   };
 
   return (
@@ -204,18 +210,24 @@ function WebcamCanvas(props) {
         </div>
       </div>
       <div id="counterSearch" style={{ alignSelf: "center" }}>
-        {!playerReady && (
+        {!playerReady && !alert ? (
           <button
+            ref={readyButton}
             className="hunting"
             onClick={() => {
               clientSocket.emit("readyUp");
+              hideReadyButton();
             }}
           >
             Ready!
           </button>
-        )}
-        {alert && (
-          <h2>The other player has hit ready. Game will start in 5 seconds.</h2>
+        ) : null}
+        {alert && !playerReady ? (
+          <h2 className="gameText">
+            Someone has hit the ready button! Game will start in 5 seconds.
+          </h2>
+        ) : (
+          <div></div>
         )}
         {playerReady && (
           <Counter

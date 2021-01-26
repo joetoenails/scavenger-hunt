@@ -47,6 +47,12 @@ io.on("connection", function (socket) {
 
   socket.on("readyUp", () => {
     socket.broadcast.emit("allPlayersReady");
+    socket.emit("allPlayersReady");
+  });
+
+  socket.on("RESETGAME", () => {
+    socket.broadcast.emit("refreshClients");
+    socket.emit("refreshClients");
   });
 
   // Remove client when socket is disconnected

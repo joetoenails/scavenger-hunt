@@ -47,7 +47,6 @@ class Counter extends React.Component {
 
   resetGame() {
     this.setState({ gameWon: false, gameLost: false, counter: 15 });
-    this.props.setReadyFalse();
   }
 
   render() {
