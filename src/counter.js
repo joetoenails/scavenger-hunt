@@ -25,7 +25,7 @@ class Counter extends React.Component {
         clearTimeout(searcher);
         this.setState({ gameLost: true });
       }
-    }, 300);
+    }, 1000);
 
     searcher = setInterval(async () => {
       console.log("searching...");

@@ -45,6 +45,10 @@ io.on("connection", function (socket) {
     socket.to(socketId).emit("candidate", candidate);
   });
 
+  socket.on("readyUp", () => {
+    socket.broadcast.emit("allPlayersReady");
+  });
+
   // Remove client when socket is disconnected
   socket.on("disconnect", () => {
     connectedUsers = connectedUsers.filter(
