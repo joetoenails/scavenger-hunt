@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { render } from "react-dom";
 import Counter from "./counter";
-import { labels, getLabels } from "../public/imagenetLabels";
+import { labels, getLabels } from "../imagenetLabels";
 import { io } from "socket.io-client";
 
 function checkMatch(predictions, searchItems) {
@@ -22,7 +22,7 @@ function WebcamCanvas(props) {
   const localVideo = React.useRef();
   const remoteVideo = React.useRef();
   const readyButton = React.useRef();
-  const searchItems = React.useRef([...getLabels(), "coffee mug"]);
+  const searchItems = React.useRef(null);
   const [playerReady, setPlayerReady] = useState(false);
   const [alert, setAlert] = useState(false);
 
@@ -148,7 +148,8 @@ function WebcamCanvas(props) {
       conn.addIceCandidate(new RTCIceCandidate(candidate));
     });
 
-    clientSocket.on("allPlayersReady", () => {
+    clientSocket.on("allPlayersReady", (data) => {
+      searchItems.current = data;
       readyCountdown();
     });
 

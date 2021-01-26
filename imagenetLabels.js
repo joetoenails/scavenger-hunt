@@ -1016,4 +1016,4 @@ function getLabels() {
   ];
 }
 
-export { labels, getLabels };
+module.exports = { labels: labels, getLabels: getLabels };

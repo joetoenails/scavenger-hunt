@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const socketio = require("socket.io");
+const { getLabels } = require("./imagenetLabels");
 
 const PORT = process.env.PORT || 8080;
 
@@ -46,8 +47,9 @@ io.on("connection", function (socket) {
   });
 
   socket.on("readyUp", () => {
-    socket.broadcast.emit("allPlayersReady");
-    socket.emit("allPlayersReady");
+    const items = [...getLabels(), "coffee mug"];
+    socket.broadcast.emit("allPlayersReady", items);
+    socket.emit("allPlayersReady", items);
   });
 
   socket.on("RESETGAME", () => {
