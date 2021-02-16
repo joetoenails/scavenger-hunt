@@ -29,18 +29,41 @@ class Counter extends React.Component {
 
     searcher = setInterval(async () => {
       console.log("searching...");
+
       const remotePredictions = await this.props.predictRemote();
       const localPredictions = await this.props.predictLocal();
+      let localResult;
+      let remoteResult;
 
-      if (this.props.checkMatch(localPredictions, this.props.searchItems)) {
-        this.setState({ gameWon: true, winner: "You are" });
+      if (localPredictions) {
+        localResult = this.props.checkMatch(
+          localPredictions,
+          this.props.searchItems
+        );
+      }
+      if (remotePredictions) {
+        remoteResult = this.props.checkMatch(
+          remotePredictions,
+          this.props.searchItems
+        );
+      }
+      if (localResult) {
+        this.setState({
+          gameWon: true,
+          winner: ` You found a ${localResult} and are`,
+        });
         clearTimeout(searcher);
         clearTimeout(timer);
       }
-      if (this.props.checkMatch(remotePredictions, this.props.searchItems)) {
-        this.setState({ gameWon: true, winner: "The other person is" });
-        clearTimeout(searcher);
-        clearTimeout(timer);
+      if (remotePredictions) {
+        if (remoteResult) {
+          this.setState({
+            gameWon: true,
+            winner: `The other person found a ${remoteResult} and is`,
+          });
+          clearTimeout(searcher);
+          clearTimeout(timer);
+        }
       }
     }, 500);
   }
@@ -61,32 +84,60 @@ class Counter extends React.Component {
         }}
       >
         {this.state.gameWon && (
-          <h2 style={{ color: "white" }}>{this.state.winner} the winner!</h2>
+          <h2 style={{ textAlign: "center" }} className="gameText">
+            {this.state.winner} the winner!
+          </h2>
         )}
         {this.state.gameLost && (
-          <h4 className="gameText" style={{ textAlign: "center" }}>
-            No one found found an item :(
+          <h4
+            className="gameText"
+            style={{ textAlign: "center", fontSize: "1em" }}
+          >
+            Time's up! No one found found an item.
           </h4>
         )}
         {this.state.gameLost || this.state.gameWon ? (
           <button
             onClick={this.resetGame}
             className="hunting"
-            style={{ width: "fit-content", alignSelf: "center" }}
+            style={{
+              width: "fit-content",
+              alignSelf: "center",
+              marginBottom: "10px",
+            }}
           >
             Try again?
           </button>
         ) : (
           <div></div>
         )}
-
-        <h1
-          className="gameText"
-          style={{ marginTop: 2, textAlign: "center", fontSize: "2em" }}
-        >
-          {this.state.counter}
-        </h1>
-        {this.state.counter !== 0 && (
+        {this.state.counter !== 0 && !this.state.gameWon && (
+          <div
+            style={{
+              textAlign: "center",
+              backgroundColor: "#CFD7C7",
+              borderRadius: "50%",
+              width: "4em",
+              height: "4em",
+              alignSelf: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <h1
+              className="gameText"
+              style={{
+                margin: 0,
+                padding: 0,
+                textAlign: "center",
+                fontSize: "3em",
+                alignSelf: "center",
+              }}
+            >
+              {this.state.counter}
+            </h1>
+          </div>
+        )}
+        {this.state.counter !== 0 && !this.state.gameWon && (
           <h2 style={{ textAlign: "center" }} className="gameText">
             Find one of these items!
           </h2>

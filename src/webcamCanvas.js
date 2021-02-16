@@ -5,16 +5,18 @@ import { labels, getLabels } from "../imagenetLabels";
 import { io } from "socket.io-client";
 
 function checkMatch(predictions, searchItems) {
-  let found = false;
   const top1 = predictions[0];
   const top2 = predictions[1];
-
+  let foundItem;
   searchItems.forEach((item) => {
-    if (item === top1.className || item === top2.className) {
-      found = true;
+    if (item === top1.className) {
+      foundItem = top1.className;
+    }
+    if (item === top2.className) {
+      foundItem = top2.className;
     }
   });
-  return found;
+  return foundItem;
 }
 
 function WebcamCanvas(props) {
@@ -33,9 +35,12 @@ function WebcamCanvas(props) {
   };
 
   const predictRemote = async () => {
-    const predictions = await props.model.classify(remoteVideo.current);
-
-    return predictions;
+    if (!remoteVideo.current.srcObject) {
+      return null;
+    } else {
+      const predictions = await props.model.classify(remoteVideo.current);
+      return predictions;
+    }
   };
 
   useEffect(() => {
@@ -195,7 +200,10 @@ function WebcamCanvas(props) {
           justifyContent: "space-around",
         }}
       >
-        <div id="left-col" style={{ display: "flex", flexDirection: "column" }}>
+        <div
+          id="left-col"
+          style={{ display: "flex", flexDirection: "column", marginBottom: 0 }}
+        >
           <video
             style={{ margin: 50, border: "5px solid white", borderRadius: 15 }}
             ref={localVideo}
@@ -207,6 +215,7 @@ function WebcamCanvas(props) {
           style={{
             display: "flex",
             flexDirection: "column",
+            marginBottom: 0,
           }}
         >
           <video
