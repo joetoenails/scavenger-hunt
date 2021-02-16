@@ -20,6 +20,8 @@ Game Page
 - [WebRTC](https://webrtc.org/)
 - [TensorFlow & ImageNet](https://github.com/tensorflow/tfjs-models/tree/master/mobilenet)
 - [React](https://reactjs.org/)
+- NodeJS
+- Express
 
 ## Features
 - Ability of your webcam to recognize items in your video stream
