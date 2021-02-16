@@ -46,13 +46,15 @@ class WelcomeLoader extends React.Component {
       <StyleRoot>
         <div style={styles.fadeIn}>
           <div id="intro-graph">
-            <h1>Welcome Hunters!</h1>
+            <h1 style={{ color: "#454235", textShadow: "3px 3px #F6F1D1" }}>
+              Welcome Hunters!
+            </h1>
             <p>
               You and a friend are about to embark a wild hunt, in your own
               home!
             </p>
             <p>
-              You'll both be given 15 seconds to find one of 3 random objects.
+              You'll both be given 15 seconds to find one of 4 random objects.
             </p>
             <p>
               Be the first to hold that item up to your webcam, and you win.
@@ -70,7 +72,7 @@ class WelcomeLoader extends React.Component {
                   this.setState({ launchGame: true });
                 }}
               >
-                Let's go hunting!
+                Let's go!
               </button>
             )}
           </div>

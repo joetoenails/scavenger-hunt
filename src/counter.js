@@ -80,15 +80,37 @@ class Counter extends React.Component {
           <div></div>
         )}
 
-        <h1 className="gameText" style={{ textAlign: "center  " }}>
+        <h1
+          className="gameText"
+          style={{ marginTop: 2, textAlign: "center", fontSize: "2em" }}
+        >
           {this.state.counter}
         </h1>
-        <div style={{ display: "flex", flexDirection: "row" }}>
+        {this.state.counter !== 0 && (
+          <h2 style={{ textAlign: "center" }} className="gameText">
+            Find one of these items!
+          </h2>
+        )}
+
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            backgroundColor: "#CFD7C7",
+            alignItems: "center",
+            borderRadius: "20px",
+          }}
+        >
           {this.props.searchItems.map((item, index) => {
             return (
               <div key={index}>
                 <h2
-                  style={{ marginLeft: 50, marginRight: 50, marginTop: 0 }}
+                  style={{
+                    marginLeft: 50,
+                    marginRight: 50,
+                    marginTop: 10,
+                    marginBottom: 10,
+                  }}
                   className="gameText"
                 >
                   {item}

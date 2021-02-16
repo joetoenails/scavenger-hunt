@@ -5,24 +5,23 @@ font-family: 'Rancho', cursive;
 font-family: 'Rock Salt', cursive;
 */
 body {
-  background: rgb(89, 171, 63);
-  background: radial-gradient(
-    circle,
-    rgb(69, 129, 50) 0%,
-    rgba(60, 83, 49, 1) 100%
-  );
+  background-image: url("https://cdn.pixabay.com/photo/2016/09/16/21/46/background-1675212_1280.jpg");
+  background-size: 100% auto;
 }
 
 #intro-graph p {
   font-family: "Fondamento", cursive;
+  font-weight: 700;
   font-size: 30px;
-  color: white;
+  color: #454235;
+  text-shadow: 2px 2px 2px #f6f1d1;
 }
 
 #intro-graph h1 {
   font-family: "Fondamento", cursive;
   font-size: 75px;
-  color: white;
+  color: #454235;
+  text-shadow: 2px 2px 2px #f6f1d1;
 }
 
 .headLine {
@@ -33,7 +32,8 @@ body {
 
 .gameText {
   font-family: "Fondamento", cursive;
-  color: white;
+  color: #454235;
+  text-shadow: 2px 2px 2px #f6f1d1;
 }
 
 #intro-graph {
@@ -44,14 +44,14 @@ body {
 }
 
 .hunting {
-  background: linear-gradient(to bottom, #99deaa 5%, #5db32b 100%);
+  background: linear-gradient(to bottom, #454235 5%, #686350 100%);
   background-color: #99deaa;
 
   display: inline-block;
   cursor: crosshair;
-  color: #000000;
+  color: white;
   font-family: Georgia;
-  font-size: 17px;
+  font-size: 32px;
   padding: 11px 9px;
   text-decoration: none;
   outline: none;
@@ -59,7 +59,7 @@ body {
   border-radius: 5px;
 }
 .hunting:hover {
-  background: linear-gradient(to bottom, #5db32b 5%, #99deaa 100%);
+  background: linear-gradient(to bottom, #686350 5%, #454235 100%);
   background-color: #5db32b;
 }
 .hunting:active {
