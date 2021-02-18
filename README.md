@@ -23,7 +23,7 @@ Game Page
 
 ## Features
 - Ability of your webcam to recognize items in your video stream
-- State changes are communicated to all players (for instance, when one player hits start game, all other player countdowns are triggered)
+- State changes are communicated to all players (for instance, when one player hits start game, all other player countdowns are triggered, game state dynamically shows if you or the other player is the winner)
 - Ability to play multiple rounds with different objects
 
 ## Installation
