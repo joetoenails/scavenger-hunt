@@ -1,5 +1,5 @@
 {
-  "name": "ScavengerHunt",
+  "name": "simpleScav",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -24,7 +24,13 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "@tensorflow-models/mobilenet": "^2.1.0",
+    "@tensorflow/tfjs": "^3.2.0",
+    "radium": "^0.26.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-animations": "^1.0.0",
+    "react-dom": "^17.0.1",
+    "socket.io": "^3.1.1",
+    "socket.io-client": "^3.1.2"
   }
 }
