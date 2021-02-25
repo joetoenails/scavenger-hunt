@@ -5,14 +5,14 @@
   "main": "index.js",
   "engines": {
     "node": "12.x",
-    "npm":"6.x"
+    "npm": "6.x"
   },
   "scripts": {
     "build-watch": "webpack -w",
     "build": "webpack",
     "deploy": "script/deploy",
     "start-dev": "NODE_ENV='development' npm run build-watch & NODE_ENV='development' nodemon server.js",
-    "start":"npm run build && node server.js"
+    "start": "npm run build && node server.js"
   },
   "keywords": [],
   "author": "",
