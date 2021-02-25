@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-watch":"webpack -w",
+    "build-watch": "webpack -w",
     "build": "webpack",
     "deploy": "script/deploy",
     "start-dev": "NODE_ENV='development' npm run build-watch & NODE_ENV='development' nodemon server.js"
@@ -26,6 +26,5 @@
   "dependencies": {
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
-
   }
 }

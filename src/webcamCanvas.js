@@ -207,7 +207,8 @@ function WebcamCanvas(props) {
           <video
             style={{ margin: 50, border: "5px solid white", borderRadius: 15 }}
             ref={localVideo}
-            autoPlay={true}
+            autoPlay
+            playsInline
           ></video>
         </div>
         <div
@@ -221,9 +222,9 @@ function WebcamCanvas(props) {
           <video
             style={{ margin: 50, border: "5px solid white", borderRadius: 15 }}
             ref={remoteVideo}
-            autoPlay={true}
+            autoPlay
             muted={true}
-            playsInline={true}
+            playsInline
           ></video>
         </div>
       </div>
